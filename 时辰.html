@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>十二时辰预兆查询</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.4;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 10px;
+            font-size: 14px;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            padding: 5px 0;
+        }
+        .current-time {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .time-display {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .period-display {
+            font-size: 1.3rem;
+            color: #3498db;
+            margin-top: 5px;
+        }
+        .omen-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .omen-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 3px solid #3498db;
+        }
+        .omen-title {
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+        .periods-container {
+            margin-top: 15px;
+        }
+        .periods-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .period-cell {
+            padding: 8px;
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .period-name {
+            font-weight: bold;
+            color: #3498db;
+            font-size: 1rem;
+        }
+        .period-range {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        .back-btn {
+            display: block;
+            margin: 15px auto;
+            padding: 8px 15px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        /* 手机端适配 */
+        @media (max-width: 768px) {
+            body {
+                font-size: 12px;
+                padding: 5px;
+            }
+            .container {
+                padding: 8px;
+            }
+            h1 {
+                font-size: 1.3rem;
+                margin-bottom: 10px;
+            }
+            .time-display {
+                font-size: 1.5rem;
+            }
+            .period-display {
+                font-size: 1.1rem;
+            }
+            .omen-grid {
+                gap: 6px;
+            }
+            .omen-item {
+                padding: 6px;
+            }
+            .omen-title {
+                font-size: 0.95rem;
+            }
+            .periods-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 5px;
+            }
+            .period-cell {
+                padding: 5px;
+            }
+            .period-name {
+                font-size: 0.9rem;
+            }
+            .period-range {
+                font-size: 0.75rem;
+            }
+        }
+
+        /* 超小屏幕适配 */
+        @media (max-width: 480px) {
+            .periods-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>十二时辰预兆查询</h1>
+        
+        <div class="current-time">
+            <div class="time-display" id="current-time"></div>
+            <div class="period-display" id="current-period"></div>
+        </div>
+        
+        <div id="omen-container">
+            <h2>当前时辰预兆</h2>
+            <div class="omen-grid" id="omen-grid"></div>
+            
+            <div class="periods-container">
+                <h2>所有时辰</h2>
+                <div class="periods-grid" id="periods-grid"></div>
+            </div>
+        </div>
+        
+        <div id="detail-container" style="display: none;">
+            <h2 id="detail-period-name"></h2>
+            <div class="omen-grid" id="detail-omen-grid"></div>
+            <button class="back-btn" onclick="showMainView()">返回时辰列表</button>
+        </div>
+    </div>
+
+    <script>
+        // 时辰数据
+        const timePeriods = [
+            { name: "子时", range: "23:00-01:00" },
+            { name: "丑时", range: "01:00-03:00" },
+            { name: "寅时", range: "03:00-05:00" },
+            { name: "卯时", range: "05:00-07:00" },
+            { name: "辰时", range: "07:00-09:00" },
+            { name: "巳时", range: "09:00-11:00" },
+            { name: "午时", range: "11:00-13:00" },
+            { name: "未时", range: "13:00-15:00" },
+            { name: "申时", range: "15:00-17:00" },
+            { name: "酉时", range: "17:00-19:00" },
+            { name: "戌时", range: "19:00-21:00" },
+            { name: "亥时", range: "21:00-23:00" }
+        ];
+
+        // 完整的预兆数据（18种预兆）
+        const omenData = [
+            { name: "焚炉法", values: ["祖师临坛，求卜大吉", "口舌是非，烦闷之事", "主得大财，阴人大吉", "有远客至，交会事吉", "有争讼事，失财不利", "音讯远至，财利大吉", "不顺心事，耗财烦恼", "贵人青睐，竭大吉昌", "有得官事，财帛大吉", "有争执事，疾病怪事", "钱物耗失，祸事临身", "凡事不顺，伤灾火灾"] },
+            { name: "面热法", values: ["主喜庆事，又主得财", "主有烦恼，忧虑之事", "主有客来，聚会大吉", "主有酒食及外人至", "主有远客，喜相逢吉", "主有急事，人来相见", "主亲来相见，命同坐", "主有词讼，口舌是非", "主有高人，会道相见", "主有高人来相见", "主有酒食，不叫自来", "主官讼及不宁之事"] },
+            { name: "眼跳法", values: ["左有贵人，右有酒食", "左有忧疑，右有人悲", "左远人来，右喜庆事", "左贵人来，右平和吉", "左客从来，右损害事", "左主酒事，右主凶事", "左主饮食，右主凶事", "主有吉昌，右主小喜", "左有财利，右有友思", "左有客至，右主亲来", "左主酒食，右主聚财", "左主有客，右主官事"] },
+            { name: "眼润法", values: ["左主财喜，右生烦恼", "左主得财，右主人思", "左奴婢事，右有喜事", "左有惊事，右有相骂", "左有喜事，右得财物", "左贵客至，右口舌事", "左有酒食，右有恶事", "左有饮食，右大吉事", "左远行事，右有客来", "左有饮食，右有相争", "左有口舌，右有喜庆", "左有远行，右有女灾"] },
+            { name: "耳热法", values: ["主有僧道来相议事", "主有喜事临身，大吉", "主有酒食相会，大吉", "主有远人来相见，吉", "主有财吉，人通达吉", "主失财物之事，不利", "主有喜气事来，大吉", "主有客至相求之事", "主有酒食宴乐事，吉", "主有女子至，婚姻事", "主争讼口舌之事", "主有口舌词讼之事"] },
+            { name: "耳鸣、耳痒法", values: ["左主友思，右主失财", "左主口舌，右主争讼", "左主失财，右主心急", "左主坎坷，右主客至", "左主远行，右主客至", "左主凶事，右主大吉", "左主远信，右主亲来", "左主饮食，右主人来", "左主行人，右主大吉", "左主失财，右主大吉", "左主酒食，右主客至", "左主大吉，右主酒食"] },
+            { name: "喷嚏法", values: ["主逢吉人，酒食相会", "情人默思，客人求事", "主男女相遇，有酒食", "主财喜有客来，同事", "主人有酒食，大吉利", "主有吉人来求财，喜", "主有客旅，酒会宴饮", "主酒食相会合之事", "夜梦惊恐，酒食不利", "主阴人来求请问事", "主情人思会和合事", "主有虚惊，反得吉利"] },
+            { name: "心惊法", values: ["主有情子思喜事至", "主有恶事临门则凶", "主有客来，饮食大吉", "主有酒食事，外人来", "主成名喜事，大吉利", "主情人思，多喜事至", "主有酒食自来，大吉", "主有情人思念，大吉", "主有大喜之事，吉利", "主有喜信至，大吉庆", "主有贵人即至，大吉", "主有恶人，占身大凶"] },
+            { name: "肉颤法", values: ["主有尊长人来，大吉", "主有吉祥临身，大吉", "主有凶事，化凶为吉", "主有得财事，大吉利", "主凶恶临身，大凶", "主宾友相见，大吉利", "主有忧疑事，自身吉", "主有喜事，占身大吉", "主有口舌，解之则吉", "主因财起祸事，大凶", "主有行人远来，大吉", "主有大吉利，喜庆之事"] },
+            { name: "手痒法", values: ["得饮食，酒会之事吉", "有贵人来，情人相思", "有忧思之事，烦恼", "君子来回之事，吉", "有客来，合作事大利", "有思念儿子消息事", "有妻之事，相请之事", "有爱念相思之事，财吉", "有远行这事，有财来", "有进退事，小心则吉", "有县官口舌之事", "有远行这事，忧愁"] },
+            { name: "足痒法", values: ["有远客来，恶事将至", "有市贾事，财利顺吉", "有人骂之口舌是非", "有贵之事，求财大吉", "有恨之意，或有恶事", "有喜事，情人相思事", "有人呼情之事，顺吉", "有好事酒食相顾之", "有远行事，烦累苦心", "有男女事，合之吉祥", "有酒肉事，对坐争强", "有酒肉事，对坐而吉"] },
+            { name: "踢足法", values: ["异性相思，是非口舌", "损害伤财，争讼不吉", "远客至，一日白忙", "有掌权事，口舌烦恼", "有忧愁事，得财之喜", "贵人相及，合会之喜", "有酒食事，有亲相问", "伤害之事，吉事平和", "饮食之事，有女相思", "不客远至，口舌是非", "遇小人害，开心聚财", "得财相投，好事成双"] },
+            { name: "衣留法", values: ["男主酒食，女主亲事", "主有忧思破财之事", "望夫进财昌，大吉利", "主酒食、交友、同会吉", "主自失财、忧灾、疾病", "女人外心，男无凶事", "主远人至，得利、大吉", "血光之灾，化凶为吉", "主得外财，出入大吉", "主有客至，破财、不利", "主词讼，得财、大吉", "主有喜事，得财、大吉"] },
+            { name: "火逸法", values: ["妻有外心，烦闷之事", "女心向外，大不吉利", "得小喜、平安大吉利", "主得财帛，享通之兆", "主忧心，损男小口，灾", "主有喜事，酒食相逢", "有相争见官、火灾事", "主得财喜昌盛之兆", "主得财帛，会合事，吉", "主有凶事，豹变之兆", "主忧心，见得理之兆", "主身疾病，妨害之兆"] },
+            { name: "斧鸣法", values: ["主六畜平安，大吉利", "主家宅定，富贵，大吉", "主家宅凶，怪事，大凶", "主家们祸事至，大凶", "主宜田蚕，有利，大吉", "有福至财来，大吉", "主官事消散，大吉昌", "主有凶祸之事，不利", "主远人来，昌盛，大吉", "主远行人来，大吉利", "主有小喜，享通，大吉", "主官事有理，大吉昌"] },
+            { name: "断甲法", values: ["有不尽意事，财上吉祥", "有合作事，喜事临身", "有耗财之事，音信吉", "有酒食事，远客至", "老情人相思，又主音信", "有朋友相托事，主吉", "事有虚惊，会朋友吉", "有不如意事，吉庆祥和", "有欢喜事，有小人碍障", "有和合事，则上见喜", "有忧疑事，解之则吉", "事有不吉，财上有失"] },
+            { name: "鹊噪法", values: ["主有远亲人至，大吉", "主有喜庆之事，大吉", "主有词讼之事，小吉", "主有酒食财喜，大吉", "主有远行人至家，吉", "主有喜事降临，大吉", "主有疾病，求神安，吉", "主有六畜不见之事", "主有喜庆事，大吉昌", "主有坎坷，不宁之事", "主有财帛享通，大吉", "主有口舌争斗之事"] },
+            { name: "犬嚎法", values: ["主有妇人不时之争", "主有忧闷忧心之事", "在上进财，昌，大吉利", "在上必得财，大吉", "主喜事至，大享通，吉", "主有亲人相会，信至", "主逢酒食宴会，大吉", "主有家中内外破财", "主家宅有小口之忧", "加官进禄，必定得财", "主有口舌之事，大凶", "主有官非词讼之事"] }
+        ];
+
+        // 获取当前时辰索引
+        function getCurrentPeriodIndex() {
+            const now = new Date();
+            const utcHour = now.getUTCHours();
+            const beijingHour = (utcHour + 8) % 24;
+            const adjustedHour = (beijingHour + 1) % 24;
+            return Math.floor(adjustedHour / 2) % 12;
+        }
+
+        // 更新时间显示
+        function updateCurrentTime() {
+            const now = new Date();
+            const utcHour = now.getUTCHours();
+            const beijingHour = (utcHour + 8) % 24;
+            const hours = beijingHour.toString().padStart(2, '0');
+            const minutes = now.getUTCMinutes().toString().padStart(2, '0');
+            const seconds = now.getUTCSeconds().toString().padStart(2, '0');
+
+            const periodIndex = getCurrentPeriodIndex();
+            const period = timePeriods[periodIndex];
+
+            document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+            document.getElementById('current-period').textContent = `${period.name}（${period.range}）`;
+
+            renderOmens(periodIndex, 'omen-grid');
+        }
+
+        // 渲染预兆列表
+        function renderOmens(periodIndex, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = omenData.map(omen => `
+                <div class="omen-item">
+                    <div class="omen-title">${omen.name}</div>
+                    <div>${omen.values[periodIndex]}</div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染时辰列表（四列布局）
+        function renderPeriodsGrid() {
+            const container = document.getElementById('periods-grid');
+            container.innerHTML = timePeriods.map(period => `
+                <div class="period-cell" onclick="showPeriodDetail(${timePeriods.indexOf(period)})">
+                    <div class="period-name">${period.name}</div>
+                    <div class="period-range">${period.range}</div>
+                </div>
+            `).join('');
+        }
+
+        // 显示时辰详情
+        function showPeriodDetail(periodIndex) {
+            const period = timePeriods[periodIndex];
+            
+            document.getElementById('detail-period-name').textContent = `${period.name}（${period.range}）`;
+            renderOmens(periodIndex, 'detail-omen-grid');
+            
+            document.getElementById('omen-container').style.display = 'none';
+            document.getElementById('detail-container').style.display = 'block';
+            
+            // 滚动到页面顶部
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // 显示主视图
+        function showMainView() {
+            document.getElementById('detail-container').style.display = 'none';
+            document.getElementById('omen-container').style.display = 'block';
+            
+            // 滚动到页面顶部
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // 初始化
+        function init() {
+            updateCurrentTime();
+            renderPeriodsGrid();
+            setInterval(updateCurrentTime, 1000);
+        }
+
+        // 页面加载完成后初始化
+        window.onload = init;
+    </script>
+</body>
+</html>
